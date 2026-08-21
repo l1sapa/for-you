@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>For You ❤️</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #17181c;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        .heart {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50%, -50%);
+        }
+
+        .window {
+            position: absolute;
+
+            width: 90px;
+            height: 65px;
+
+            background: #d8eff7;
+
+            border-radius: 4px;
+            overflow: hidden;
+
+            box-shadow:
+                0 3px 8px rgba(0,0,0,.35),
+                inset 0 1px rgba(255,255,255,.8);
+
+            transition:
+                left 1.5s cubic-bezier(.2,.8,.2,1),
+                top 1.5s cubic-bezier(.2,.8,.2,1),
+                transform .3s;
+        }
+
+        .bar {
+            height: 18px;
+
+            background: #f5f5f5;
+
+            border-radius: 4px 4px 0 0;
+
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+
+            padding-right: 7px;
+            gap: 7px;
+
+            color: #777;
+            font-size: 10px;
+
+            user-select: none;
+        }
+
+        .content {
+            height: 47px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            padding: 4px;
+
+            font-size: 11px;
+            line-height: 1.15;
+
+            color: #333;
+        }
+
+        .pink .content {
+            background: #ef9fc4;
+        }
+
+        .blue .content {
+            background: #9dd8ea;
+        }
+
+        .green .content {
+            background: #a8df9a;
+        }
+
+        .yellow .content {
+            background: #eee0a0;
+        }
+
+        .purple .content {
+            background: #c7afe5;
+        }
+
+
+        /* CENTER WINDOW */
+
+        .special {
+            z-index: 1000;
+
+            width: 120px;
+            height: 90px;
+        }
+
+        .special .content {
+            height: 72px;
+
+            font-size: 17px;
+            font-weight: bold;
+
+            background: #f2a9c7;
+        }
+
+        .memory-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.7);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 0.3s;
+
+    z-index: 9999;
+}
+
+        .memory-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .memory-card {
+            width: min(420px, 85vw);
+            min-height: 250px;
+
+            background: white;
+            border-radius: 10px;
+
+            overflow: hidden;
+
+            transform: scale(0.8);
+
+            transition: transform 0.3s;
+        }
+
+        .memory-overlay.active .memory-card {
+            transform: scale(1);
+        }
+
+        .memory-bar {
+    height: 30px;
+    background: #f5f5f5;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 10px;
+
+    color: #777;
+    font-size: 12px;
+}
+
+.close {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.close:hover {
+    color: #e85b8f;
+}
+
+.memory-content {
+    min-height: 220px;
+
+    padding: 30px;
+
+    background: #FAF8F5;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+}
+
+.memory-heart {
+    font-size: 35px;
+    margin-bottom: 15px;
+}
+
+.memory-title {
+    font-size: 20px;
+    line-height: 1.5;
+    font-weight: bold;
+    color: #333;
+}
+
+        /* PHONE */
+
+        @media (max-width: 700px) {
+
+            .heart {
+                transform:
+                    translate(-50%, -50%)
+                    scale(.52);
+            }
+
+        }
+
+        @media (max-width: 380px) {
+
+            .heart {
+                transform:
+                    translate(-50%, -50%)
+                    scale(.43);
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+<div class="heart" id="heart"></div>
+
+
+<script>
+
+    const heart = document.getElementById("heart");
+
+
+    /* =========================
+       COLORS
+    ========================= */
+
+    const colors = [
+        "pink",
+        "blue",
+        "green",
+        "yellow",
+        "purple"
+    ];
+
+
+    /* =========================
+       YOUR MEMORIES
+    ========================= */
+
+    const messages = [ "the day we met",
+    'first "I love you"',
+    "你的个性", "your eyes",
+    "when I realised how much I love you",
+    "your lips",
+    "every little thing",
+    "我想你",
+    "你对我的关心",
+    "your smile",
+    "your voice",
+    "the way you talk to me",
+    "how similar we are",
+    "我爱你", "我一直都很想念你",
+    "我爱你的一切",
+    "我看到了和你共创的未来",
+    "我醒来后第一个想到的人就是你",
+    "你是我睡前最后一个念头",
+    "我想看到你",
+    "我想每天醒来都能看到你",
+    "我希望永远和你在一起",
+    "一起喝酒一起睡觉",
+    "我总是想起你",
+    "你在我心中很特别",
+    "I want to be with you till we grow old",
+    "我想拥抱你",
+    "我会把我的第一次都告诉你",
+    "我的初吻属于你",
+    "我想伴着你的心跳入睡",
+    "我想和你一起做饭",
+    "我只想和你在一起",
+    "无论如何，我都爱你",
+    "你是我眼中唯一的男人",
+    "我的宝宝好可爱",
+    "我男朋友帅得耀眼",
+    "豆豆好温柔",
+    "你是我的爱人",
+    "我就是爱你",
+    "我想和你一起旅行",
+    "我想和你一起看世界",
+    "我希望有一天能成为你的妻子",
+    "我只想属于你",
+    "我真的非常非常爱你",
+    "呵呵，你真可爱" ];
+
+
+    /* =========================
+       CREATE POPUP
+    ========================= */
+
+    const overlay =
+        document.createElement("div");
+
+    overlay.className =
+        "memory-overlay";
+
+
+    overlay.innerHTML = `
+
+        <div class="memory-card">
+
+            <div class="memory-bar">
+
+                <span>tomylove.exe</span>
+
+                <span class="close">
+                    ×
+                </span>
+
+            </div>
+
+            <div class="memory-content">
+
+                <div class="memory-heart">
+                    ❤️
+                </div>
+
+                <div class="memory-title">
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(overlay);
+
+
+    const memoryTitle =
+        overlay.querySelector(".memory-title");
+
+    const closeButton =
+        overlay.querySelector(".close");
+
+
+    /* =========================
+       OPEN MEMORY
+    ========================= */
+
+    function openMemory(message) {
+
+        memoryTitle.innerText =
+            message;
+
+        overlay.classList.add("active");
+
+    }
+
+
+    /* =========================
+       CLOSE MEMORY
+    ========================= */
+
+    function closeMemory() {
+
+        overlay.classList.remove("active");
+
+    }
+
+
+    closeButton.addEventListener(
+        "click",
+        closeMemory
+    );
+
+
+    /* CLICK OUTSIDE */
+
+    overlay.addEventListener(
+        "click",
+        function(event) {
+
+            if (event.target === overlay) {
+
+                closeMemory();
+
+            }
+
+        }
+    );
+
+
+    /* =========================
+       NUMBER OF WINDOWS
+    ========================= */
+
+    const windows = 55;
+
+
+    /* =========================
+       CREATE WINDOWS
+    ========================= */
+
+    for (let i = 0; i < windows; i++) {
+
+        const w =
+            document.createElement("div");
+
+
+        /* RANDOM COLOR */
+
+        const color =
+            colors[
+                Math.floor(
+                    Math.random() *
+                    colors.length
+                )
+            ];
+
+
+        w.className =
+            "window " + color;
+
+
+        /* WINDOW BAR */
+
+        const bar =
+            document.createElement("div");
+
+        bar.className =
+            "bar";
+
+        bar.innerHTML =
+            "— □ ×";
+
+
+        /* WINDOW CONTENT */
+
+        const content =
+            document.createElement("div");
+
+        content.className =
+            "content";
+
+
+        /* PICK A MESSAGE */
+
+        const message = messages[i % messages.length];
+
+
+        content.innerText =
+            message;
+
+
+        w.appendChild(bar);
+
+        w.appendChild(content);
+
+        heart.appendChild(w);
+
+
+        /* =========================
+           RANDOM START
+        ========================= */
+
+        w.style.left =
+            Math.random() * 500 + "px";
+
+        w.style.top =
+            Math.random() * 500 + "px";
+
+
+        /* =========================
+           HEART EQUATION
+        ========================= */
+
+        const t =
+            (Math.PI * 2 * i) /
+            windows;
+
+
+        const x =
+            16 *
+            Math.pow(
+                Math.sin(t),
+                3
+            );
+
+
+        const y =
+            13 * Math.cos(t)
+            - 5 * Math.cos(2 * t)
+            - 2 * Math.cos(3 * t)
+            - Math.cos(4 * t);
+
+
+        const scale =
+            18;
+
+
+        const left =
+            300 +
+            x * scale -
+            45;
+
+
+        const top =
+            280 -
+            y * scale -
+            32;
+
+
+        /* =========================
+           FLY INTO HEART
+        ========================= */
+
+        setTimeout(() => {
+
+            w.style.left =
+                left + "px";
+
+            w.style.top =
+                top + "px";
+
+            w.style.transform =
+                `rotate(${Math.random() * 10 - 5}deg)`;
+
+        }, i * 15);
+
+
+        /* =========================
+           CLICK WINDOW
+        ========================= */
+
+        w.addEventListener(
+            "click",
+            function(event) {
+
+                event.stopPropagation();
+
+                openMemory(message);
+
+            }
+        );
+
+    }
+
+
+    /* =========================
+       CENTER WINDOW
+    ========================= */
+
+    const special =
+        document.createElement("div");
+
+
+    special.className =
+        "window special pink";
+
+
+    special.style.left =
+        "240px";
+
+    special.style.top =
+        "250px";
+
+
+    special.innerHTML = `
+
+        <div class="bar">
+            — □ ×
+        </div>
+
+        <div class="content">
+            I love you ❤️
+        </div>
+
+    `;
+
+
+    heart.appendChild(special);
+
+
+    /* =========================
+       CENTER CLICK
+    ========================= */
+
+    special.addEventListener(
+        "click",
+        function() {
+
+            openMemory(
+                "Out of all the people in the world, I'm happiest that I found you. ❤️"
+            );
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
